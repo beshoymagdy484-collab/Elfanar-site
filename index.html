@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<title>الفنار سكاوت</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f3f5f8;--card:#fff;--ink:#0b1f3a;--mut:#5b6b82;--navy:#0b1f3a;--silver:#c5ccd6;--line:#dde2ea;--ok:#1d7a4d;--bad:#b23a3a;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#08121f;--card:#0f2038;--ink:#eef2f7;--mut:#9fb0c6;--navy:#16335a;--line:#1f3556}}
+html{height:100%;scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;font-family:Cairo,Tahoma,sans-serif;background:var(--bg);color:var(--ink);line-height:1.6}
+header{background:#0b1f3a;color:#fff;padding:10px 14px;display:flex;align-items:center;gap:10px;position:sticky;top:env(safe-area-inset-top,0px);z-index:5}
+header b{flex:1;font-weight:800}
+header select{background:#16335a;color:#fff;border:1px solid #3a5580;border-radius:8px;padding:4px;font-family:inherit}
+nav{display:flex;gap:6px;overflow-x:auto;padding:8px 10px;background:#13294a}
+nav a{color:#c5ccd6;text-decoration:none;white-space:nowrap;padding:5px 12px;border-radius:99px;font-size:14px}
+nav a.on{background:#c5ccd6;color:#0b1f3a;font-weight:600}
+main{max-width:900px;margin:0 auto;padding:14px}
+h2{margin:6px 0 10px;font-size:20px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px;margin-bottom:10px}
+.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
+.alert{background:#0b1f3a;color:#fff;border-radius:12px;padding:14px;margin-bottom:12px;border-inline-start:6px solid #c5ccd6}
+.alert small{color:#c5ccd6}
+.hero{text-align:center;padding:18px 8px}
+.hero svg{width:96px;height:96px}
+button,.btn{font-family:inherit;background:#0b1f3a;color:#fff;border:0;border-radius:8px;padding:7px 14px;cursor:pointer;font-size:14px}
+button.s{background:var(--line);color:var(--ink)}
+input,select,textarea{font-family:inherit;font-size:15px;padding:7px;border:1px solid var(--line);border-radius:8px;background:var(--card);color:var(--ink);max-width:100%}
+input[type=text],textarea{width:100%}
+.mut{color:var(--mut);font-size:13px}
+.tag{display:inline-block;padding:1px 10px;border-radius:99px;font-size:12px;color:#fff}
+.av{width:44px;height:44px;border-radius:50%;background:#c5ccd6;color:#0b1f3a;display:grid;place-items:center;font-weight:800;flex:none}
+.tbl{overflow-x:auto}table{border-collapse:collapse;width:100%;font-size:14px}th,td{padding:6px 8px;border-bottom:1px solid var(--line);text-align:start;white-space:nowrap}
+.pos{color:var(--ok)}.neg{color:var(--bad)}
+.bar{height:8px;background:var(--line);border-radius:9px;overflow:hidden}.bar i{display:block;height:100%;background:#0b1f3a}
+.note{font-size:12px;color:var(--mut);text-align:center;padding:10px}
+a{color:inherit}
+</style>
+</head>
+<body>
+<header>
+<svg width="26" height="26" viewBox="0 0 64 64"><use href="#fn"/></svg>
+<b>الفنار سكاوت</b>
+<span id="who" class="mut" style="color:#c5ccd6"></span><button class="s" id="lb" onclick="lbc()">دخول الإدارة</button>
+</header>
+<nav id="nav"></nav>
+<main id="app"><div class="card">جاري التحميل...</div></main>
+
+<svg width="0" height="0" style="position:absolute"><defs><g id="fn" fill="none" stroke="#c5ccd6" stroke-width="3" stroke-linejoin="round"><path d="M26 56 L30 20 H34 L38 56 Z" fill="#fff" fill-opacity=".15"/><path d="M28 20 H36 L32 10 Z"/><path d="M12 28 L28 24 M52 28 L36 24"/><path d="M20 56 H44"/></g></defs></svg>
+<div id="login" style="display:none;position:fixed;inset:0;z-index:20;background:#0b1f3a;place-items:center;padding:20px"><div class="card" style="width:min(340px,100%)"><div class="hero"><svg viewBox="0 0 64 64" style="background:#0b1f3a;border-radius:50%;padding:8px"><use href="#fn"/></svg><h2>الفنار سكاوت</h2></div><input id="em" type="text" dir="ltr" placeholder="البريد الإلكتروني"><input id="pw" type="password" dir="ltr" placeholder="كلمة المرور" style="width:100%;margin:8px 0"><button onclick="doLogin()" style="width:100%">دخول</button><button class="s" onclick="$('#login').style.display='none'" style="width:100%;margin-top:6px">رجوع للموقع</button><div id="lm" class="neg" style="margin-top:6px"></div></div></div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+<script>
+const showErr=m=>{const a=document.getElementById("app");if(a)a.innerHTML="<div class=card style=color:#b23a3a>حدث خطأ: "+String(m).replace(/</g,"")+"</div>"};
+window.onerror=(m)=>showErr(m);addEventListener("unhandledrejection",e=>showErr(e.reason&&e.reason.message||e.reason));
+const $=s=>document.querySelector(s);
+const today=new Date().toISOString().slice(0,10);
+const D=(n)=>{const d=new Date();d.setDate(d.getDate()-n);return d.toISOString().slice(0,10)};
+let S={patrols:[],scouts:[],badges:[],awards:[],meet:[],bonus:[],lib:{},news:[],albums:[],log:[]};
+const save=()=>{};
+const SB=supabase.createClient('https://gythhoywshbygqmdnyod.supabase.co','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd5dGhob3l3c2hieWdxbWRueW9kIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTQ5MzU5MDksImV4cCI6MjExMDUxMTkwOX0.5l_s_I7zGTM6NSk17Y9cSsiRcRYKZZYRjMo4nYuYuhc');
+const ok=async p=>{const r=await p;if(r.error){alert('حدث خطأ: '+r.error.message);throw r.error}return r};
+let role="admin1";
+const ROLE={admin1:"المسؤول الأساسي",admin2:"المسؤول الثاني",scout:"كشاف"};
+const adm=()=>role!=="scout";
+const logit=(op,det)=>SB.from('audit_log').insert({who:ROLE[role],op,details:det});
+const age=b=>Math.floor((Date.now()-new Date(b))/31557600000);
+const act=()=>S.scouts.filter(s=>!s.arch);
+const sc=id=>S.scouts.find(s=>s.id==id);
+const pt=id=>S.patrols.find(p=>p.id==id);
+const bal=id=>S.bonus.filter(b=>b.s==id).reduce((a,b)=>a+b.v,0);
+const att=id=>{const m=S.meet.filter(x=>id in x.p);const p=m.filter(x=>x.p[id]).length;return{p,t:m.length,r:m.length?Math.round(p/m.length*100):0}};
+const ini=n=>n.trim()[0];
+const logo=(big)=>`<svg viewBox="0 0 64 64" style="background:#0b1f3a;border-radius:50%;padding:8px"><use href="#fn"/></svg>`;
+const pages=[["home","الرئيسية"],["scouts","الكشافين"],["patrols","الطلايع"],["attend","الحضور"],["bonus","البونص"],["badges","الشارات"],["lib","المكتبة"],["news","الأخبار"],["album","الذكريات"],["stats","الإحصائيات"],["log","السجل"],["admin","الإعدادات"]];
+const vis=k=>({log:adm(),admin:role==="admin1"})[k]!==false;
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+let libSec="الصيحات الكشفية",q="",ym=today.slice(0,7);
+function R(){
+const h=(location.hash||"#home").slice(1);const [pg,arg]=h.split("-");
+$("#nav").innerHTML=pages.filter(p=>vis(p[0])).map(p=>`<a href="#${p[0]}" class="${p[0]==pg||(pg=="scout"&&p[0]=="scouts")?"on":""}">${p[1]}</a>`).join("");
+const f=V[pg]||V.home;$("#app").innerHTML=vis(pg)||!V[pg]?f(arg):'<div class="card">هذه الصفحة للإدارة فقط.</div>';
+}
+const V={
+home(){const imp=S.news.filter(n=>n.imp);return`<div class="hero">${logo()}<h2>أهلًا بك في الفنار سكاوت</h2><div class="mut">مجموعة الفنار الكشفية</div></div>
+${imp.map(n=>`<div class="alert"><b>${esc(n.t)}</b><br>${esc(n.x)}<br><small>${n.date}</small></div>`).join("")}
+<div class="grid">${[["scouts","دليل الكشافين"],["lib","المكتبة الكشفية"],["album","ألبوم الذكريات"],["news","الأخبار"],["patrols","الطلايع"],["attend","الحضور"]].map(a=>`<a class="card" href="#${a[0]}" style="text-decoration:none;text-align:center;font-weight:600">${a[1]}</a>`).join("")}</div>`},
+scouts(){return`<h2>دليل الكشافين</h2>${adm()?`<div class="card row"><input id="nn" type="text" placeholder="اسم كشاف جديد" style="flex:1"><button onclick="addScout()">إضافة</button><label class="btn s" style="background:var(--line);color:var(--ink)">استيراد Excel/CSV<input type="file" accept=".csv" hidden onchange="imp(this)"></label></div>`:""}
+${act().map(s=>`<a class="card row" href="#scout-${s.id}" style="text-decoration:none"><div class="av">${ini(s.name)}</div><div style="flex:1"><b>${esc(s.name)}</b><div class="mut">${s.stage} · ${pt(s.patrol)?.name||"—"}</div></div><span class="mut">${bal(s.id)} نقطة</span></a>`).join("")}
+${S.scouts.some(s=>s.arch)?`<h2>الأرشيف</h2>`+S.scouts.filter(s=>s.arch).map(s=>`<a class="card" href="#scout-${s.id}" style="display:block;text-decoration:none">${esc(s.name)} <span class="mut">(مؤرشف)</span></a>`).join(""):""}`},
+scout(id){const s=sc(id);if(!s)return"";const a=att(s.id);
+return`<div class="card row"><div class="av" style="width:64px;height:64px;font-size:26px">${ini(s.name)}</div><div><h2 style="margin:0">${esc(s.name)}</h2><span class="mut">${age(s.birth)} سنة · ${s.stage}</span></div></div>
+<div class="card"><b>بيانات شخصية</b><br>تاريخ الميلاد: ${s.birth}<br>أب الاعتراف: ${esc(s.father)}
+${adm()?`<br>التليفون: ${s.phone}<br>ولي الأمر: ${s.parent}<br>العنوان: ${esc(s.addr)}`:`<br><span class="mut">الأرقام والعنوان للإدارة فقط</span>`}</div>
+<div class="card"><b>بيانات كشفية</b><br>الانضمام: ${s.join}<br>الطليعة: ${pt(s.patrol)?.name||"—"}<br>الكوفية: ${esc(s.scarf)}<br>الحضور: ${a.p} من ${a.t} (${a.r}%)</div>
+<div class="card"><b>الشارات</b><div class="row">${S.awards.filter(w=>w.s==s.id).map(w=>{const b=S.badges.find(x=>x.id==w.b);return`<div style="text-align:center"><div style="font-size:30px">${b.img}</div><div style="font-size:13px">${esc(b.name)}</div><div class="mut">${w.date}</div></div>`}).join("")||"<span class='mut'>لا شارات بعد</span>"}</div></div>
+<div class="card"><b>رصيد البونص: ${bal(s.id)}</b><div class="tbl"><table>${S.bonus.filter(b=>b.s==s.id).map(b=>`<tr><td class="${b.v>0?"pos":"neg"}">${b.v>0?"+":""}${b.v}</td><td>${esc(b.why)}</td><td>${b.date}</td></tr>`).join("")}</table></div></div>
+${adm()?`<div class="card"><b>تعديل البيانات</b><div class="grid" style="margin-top:6px">${[["name","الاسم",s.name,"text"],["birth","تاريخ الميلاد",s.birth,"date"],["stage","المرحلة الدراسية",s.stage,"text"],["father","أب الاعتراف",s.father,"text"],["join","تاريخ الانضمام",s.join,"date"],["scarf","الكوفية",s.scarf,"text"],["phone","التليفون",s.phone,"text"],["parent","تليفون ولي الأمر",s.parent,"text"],["addr","العنوان",s.addr,"text"]].map(f=>`<label class="mut">${f[1]}<input id="e_${f[0]}" type="${f[3]}" value="${esc(f[3]=="date"&&!/^\d/.test(f[2])?"":f[2])}" style="width:100%"></label>`).join("")}</div><button style="margin-top:8px" onclick="saveScout(${s.id})">حفظ</button></div>`:""}
+${adm()?`<div class="card row"><select onchange="mv(${s.id},this.value)">${S.patrols.map(p=>`<option value="${p.id}" ${p.id==s.patrol?"selected":""}>${p.name}</option>`).join("")}</select><button class="s" onclick="arch(${s.id})">${s.arch?"استرجاع":"أرشفة"}</button></div>`:""}`},
+patrols(){return`<h2>الطلايع</h2>${S.patrols.map(p=>`<div class="card"><div class="row"><span style="font-size:30px">${p.logo}</span><b style="flex:1">${esc(p.name)}</b><span class="tag" style="background:${p.color}">${p.flag}</span></div><div class="mut">الصيحة: ${esc(p.cry)}</div><div>${act().filter(s=>s.patrol==p.id).map(s=>esc(s.name)).join("، ")||"—"}</div>${adm()?`<button class="s" style="margin-top:6px" onclick="editP(${p.id})">تعديل الصيحة</button>`:""}</div>`).join("")}`},
+attend(){const ms=S.meet.filter(m=>m.date.slice(0,7)==ym);return`<h2>الحضور والغياب</h2>
+${adm()?`<div class="card row"><input type="date" id="md" value="${today}"><button onclick="newM()">اجتماع جديد</button></div>`:""}
+<div class="card row"><input type="month" value="${ym}" onchange="ym=this.value;R()"><span class="mut">${ms.length} اجتماع في الشهر</span></div>
+${[...S.meet].sort((a,b)=>b.date>a.date?1:-1).map((m,i)=>{const n=Object.values(m.p).filter(Boolean).length;return`<div class="card"><b>${m.date}</b> <span class="mut">حضور ${n} من ${Object.keys(m.p).length}</span>
+<div class="tbl"><table>${act().map(s=>`<tr><td>${esc(s.name)}</td><td>${adm()?`<button class="${m.p[s.id]?"":"s"}" onclick="tg('${m.date}',${s.id})">${m.p[s.id]?"حاضر":"غائب"}</button>`:(m.p[s.id]?"حاضر":"غائب")}</td></tr>`).join("")}</table></div></div>`}).join("")}`},
+bonus(){return`<h2>البونص</h2>${adm()?`<div class="card"><div class="row"><select id="bt"><option value="s">كشاف</option><option value="p">طليعة</option><option value="a">الكل</option></select><select id="bs">${act().map(s=>`<option value="${s.id}">${esc(s.name)}</option>`).join("")}</select><select id="bp">${S.patrols.map(p=>`<option value="${p.id}">${p.name}</option>`).join("")}</select></div><div class="row" style="margin-top:6px"><input id="bv" type="number" placeholder="± نقاط" style="width:90px"><input id="bw" type="text" placeholder="السبب" style="flex:1"><button onclick="addB()">تسجيل</button></div></div>`:""}
+<div class="card tbl"><table>${S.bonus.slice().reverse().map(b=>`<tr><td>${esc(sc(b.s)?.name||"")}</td><td class="${b.v>0?"pos":"neg"}">${b.v>0?"+":""}${b.v}</td><td>${esc(b.why)}</td><td>${b.date}</td><td>${b.by}</td></tr>`).join("")}</table></div>`},
+badges(){return`<h2>مكتبة الشارات</h2><div class="grid">${S.badges.map(b=>`<div class="card" style="text-align:center"><div style="font-size:36px">${b.img}</div><b>${esc(b.name)}</b><div class="mut">${esc(b.desc)}</div><div class="mut">${S.awards.filter(w=>w.b==b.id).length} كشاف</div></div>`).join("")}</div>
+${adm()?`<div class="card row"><select id="gb">${S.badges.map(b=>`<option value="${b.id}">${esc(b.name)}</option>`).join("")}</select><select id="gs">${act().map(s=>`<option value="${s.id}">${esc(s.name)}</option>`).join("")}</select><button onclick="award()">منح الشارة</button></div><div class="card row"><input id="bn" type="text" placeholder="اسم شارة جديدة" style="flex:1"><button onclick="addBadge()">إضافة</button></div>`:""}`},
+lib(){const items=S.lib[libSec].filter(i=>(i.t+i.x).includes(q));return`<h2>المكتبة الكشفية</h2><div class="row" style="margin-bottom:8px">${Object.keys(S.lib).map(k=>`<button class="${k==libSec?"":"s"}" onclick="libSec='${k}';q='';R()">${k}</button>`).join("")}</div>
+<input type="text" placeholder="بحث داخل ${libSec}" value="${esc(q)}" oninput="q=this.value;lq()" id="lq"><div id="li" style="margin-top:8px">${li(items)}</div>
+${adm()?`<div class="card row" style="margin-top:8px"><input id="lt" type="text" placeholder="العنوان" style="flex:1"><input id="lx" type="text" placeholder="المحتوى" style="flex:2"><button onclick="addL()">إضافة</button></div>`:""}`},
+news(){return`<h2>الأخبار والإعلانات</h2>${adm()?`<div class="card"><input id="nt" type="text" placeholder="العنوان"><input id="nx" type="text" placeholder="النص" style="margin-top:6px"><div class="row" style="margin-top:6px"><label><input type="checkbox" id="ni"> مهم (يظهر في الرئيسية)</label><button onclick="addN()">نشر</button></div></div>`:""}
+${S.news.map(n=>`<div class="card" ${n.imp?'style="border-inline-start:5px solid #0b1f3a"':""}><b>${esc(n.t)}</b> ${n.imp?'<span class="tag" style="background:#0b1f3a">مهم</span>':""}<div>${esc(n.x)}</div><div class="mut">${n.date}</div></div>`).join("")}`},
+album(){return`<h2>ألبوم الذكريات</h2>${adm()?`<div class="card row"><input id="at" type="text" placeholder="اسم المناسبة" style="flex:1"><button onclick="addA()">ألبوم جديد</button></div>`:""}<div class="grid">${S.albums.map(a=>`<div class="card"><div style="height:70px;border-radius:8px;background:linear-gradient(135deg,#0b1f3a,#c5ccd6)"></div><b>${esc(a.t)}</b><div class="mut">${a.date}</div><div style="font-size:13px">${esc(a.x||"")}</div></div>`).join("")}</div>`},
+stats(){const A=act(),tot=S.bonus.reduce((a,b)=>a+(b.v>0?b.v:0),0),neg=S.bonus.reduce((a,b)=>a+(b.v<0?-b.v:0),0);return`<h2>الإحصائيات والتقارير</h2>
+<div class="grid"><div class="card"><b>${A.length}</b><div class="mut">كشاف نشط</div></div><div class="card"><b>${S.meet.length}</b><div class="mut">اجتماع</div></div><div class="card"><b>${S.awards.length}</b><div class="mut">شارة ممنوحة</div></div><div class="card"><b class="pos">+${tot}</b> / <b class="neg">-${neg}</b><div class="mut">بونص</div></div></div>
+<div class="card"><b>الطلايع</b>${S.patrols.map(p=>`<div>${p.name}: ${A.filter(s=>s.patrol==p.id).length}</div>`).join("")}</div>
+<div class="card"><b>نسب الالتزام</b>${A.map(s=>{const a=att(s.id);return`<div class="mut">${esc(s.name)} — ${a.r}%</div><div class="bar"><i style="width:${a.r}%"></i></div>`}).join("")}</div>`},
+log(){return`<h2>سجل النشاط الإداري</h2><div class="card tbl"><table>${S.log.map(l=>`<tr><td>${l.at}</td><td>${l.who}</td><td>${esc(l.op)}</td><td>${esc(l.det)}</td></tr>`).join("")||"<tr><td>لا عمليات بعد</td></tr>"}</table></div>`},
+admin(){return`<h2>الإعدادات والنسخ الاحتياطي</h2><div class="card"><div class="row"><button onclick="bk()">تنزيل نسخة احتياطية</button><label class="btn s" style="background:var(--line);color:var(--ink)">استرجاع<input type="file" accept=".json" hidden onchange="rs(this)"></label></div><p class="mut">في النسخة الحقيقية: نسخ تلقائي منتظم، وإدارة حسابات المسؤولين وصلاحياتهم.</p></div>`}
+};
+const li=a=>a.map(i=>`<div class="card"><b>${esc(i.t)}</b><div>${esc(i.x)}</div></div>`).join("")||'<div class="mut">لا نتائج</div>';
+function lq(){$("#li").innerHTML=li(S.lib[libSec].filter(i=>(i.t+i.x).includes(q)))}
+async function reload(){
+const g=n=>SB.from(n).select('*');
+const r=await Promise.all([g('patrols'),g('scouts'),g('scout_private'),g('badges'),g('awards'),g('meetings'),g('attendance'),g('bonus'),g('library'),g('news'),g('albums'),adm()?g('audit_log'):Promise.resolve({data:[]})]);
+const [pa,sc2,pv,ba,aw,me,at,bo,lb,ne,al,lg]=r.map(x=>x.data||[]);
+S.patrols=pa;
+S.scouts=sc2.map(x=>{const v=pv.find(y=>y.scout_id==x.id)||{};return{id:x.id,name:x.name,birth:x.birth||'2012-01-01',stage:x.stage||'—',father:x.father||'—',join:x.join_date||'—',patrol:x.patrol_id,scarf:x.scarf||'—',arch:x.archived?1:0,phone:v.phone||'',parent:v.parent_phone||'',addr:v.address||''}});
+S.badges=ba.map(b=>({id:b.id,name:b.name,desc:b.description||'',img:b.image||'🎖️'}));
+S.awards=aw.map(w=>({b:w.badge_id,s:w.scout_id,date:w.date}));
+S.meet=me.map(m=>{const p={};at.filter(a=>a.meeting_id==m.id).forEach(a=>p[a.scout_id]=a.present?1:0);return{id:m.id,date:m.date,p}});
+S.bonus=bo.map(b=>({s:b.scout_id,v:b.points,why:b.reason||'',date:(b.created_at||'').slice(0,10),by:b.by_name||''}));
+S.lib={'الصيحات الكشفية':[],'التقاليد الكشفية':[],'المهارات الكشفية':[],'التعليمات والقواعد':[],'المعلومات الروحية':[]};
+lb.forEach(i=>{if(S.lib[i.section])S.lib[i.section].push({t:i.title,x:i.body||''})});
+S.news=ne.sort((a,b)=>b.created_at>a.created_at?1:-1).map(n=>({t:n.title,x:n.body||'',imp:n.important?1:0,date:(n.created_at||'').slice(0,10)}));
+S.albums=al.map(a=>({t:a.title,date:a.event_date||'',x:a.description||''}));
+S.log=lg.sort((a,b)=>b.id-a.id).map(l=>({who:l.who,op:l.op,det:l.details||'',at:new Date(l.at).toLocaleString('ar-EG')}));
+}
+async function C(op,det){await logit(op,det);await reload();R()}
+async function newScouts(names){const r=await ok(SB.from('scouts').insert(names.map(n=>({name:n,patrol_id:S.patrols[0]?S.patrols[0].id:null}))).select());await ok(SB.from('scout_private').insert(r.data.map(x=>({scout_id:x.id}))))}
+async function saveScout(id){const v=k=>$('#e_'+k).value;await ok(SB.from('scouts').update({name:v('name'),birth:v('birth')||null,stage:v('stage'),father:v('father'),join_date:v('join')||null,scarf:v('scarf')}).eq('id',id));await ok(SB.from('scout_private').upsert({scout_id:id,phone:v('phone'),parent_phone:v('parent'),address:v('addr')}));C('تعديل بيانات كشاف',v('name'))}
+async function addScout(){const n=$('#nn').value.trim();if(!n)return;await newScouts([n]);C('إضافة كشاف',n)}
+function imp(el){const f=el.files[0];if(!f)return;const r=new FileReader();r.onload=async()=>{const rows=r.result.split(/\r?\n/).map(x=>x.split(',')[0].trim()).filter(Boolean);await newScouts(rows);C('استيراد كشافين',rows.length+' اسم')};r.readAsText(f)}
+async function mv(id,p){await ok(SB.from('scouts').update({patrol_id:+p}).eq('id',id));C('نقل كشاف',sc(id).name)}
+async function arch(id){const s=sc(id);await ok(SB.from('scouts').update({archived:!s.arch}).eq('id',id));C(s.arch?'استرجاع':'أرشفة',s.name)}
+async function editP(id){const p=pt(id),v=prompt('الصيحة الجديدة',p.cry);if(v){await ok(SB.from('patrols').update({cry:v}).eq('id',id));C('تعديل طليعة',p.name)}}
+async function newM(){const d=$('#md').value;if(!d||S.meet.some(m=>m.date==d))return;const r=await ok(SB.from('meetings').insert({date:d}).select());await ok(SB.from('attendance').insert(act().map(s=>({meeting_id:r.data[0].id,scout_id:s.id,present:false}))));C('تسجيل اجتماع',d)}
+async function tg(d,id){const m=S.meet.find(x=>x.date==d);await ok(SB.from('attendance').upsert({meeting_id:m.id,scout_id:id,present:!m.p[id]}));C('تعديل حضور',d+' - '+sc(id).name)}
+async function addB(){const v=+$('#bv').value,w=$('#bw').value.trim(),t=$('#bt').value;if(!v||!w)return;const ids=t=='s'?[+$('#bs').value]:t=='p'?act().filter(s=>s.patrol==$('#bp').value).map(s=>s.id):act().map(s=>s.id);await ok(SB.from('bonus').insert(ids.map(s=>({scout_id:s,points:v,reason:w,by_name:ROLE[role]}))));C('بونص '+(v>0?'إضافة':'خصم'),w+' ('+ids.length+' كشاف)')}
+async function award(){await ok(SB.from('awards').insert({badge_id:+$('#gb').value,scout_id:+$('#gs').value}));C('منح شارة',sc($('#gs').value).name)}
+async function addBadge(){const n=$('#bn').value.trim();if(!n)return;await ok(SB.from('badges').insert({name:n,image:'🎖️'}));C('إضافة شارة',n)}
+async function addL(){const t=$('#lt').value.trim();if(!t)return;await ok(SB.from('library').insert({section:libSec,title:t,body:$('#lx').value}));C('إضافة محتوى',t)}
+async function addN(){const t=$('#nt').value.trim();if(!t)return;await ok(SB.from('news').insert({title:t,body:$('#nx').value,important:$('#ni').checked}));C('نشر خبر',t)}
+async function addA(){const t=$('#at').value.trim();if(!t)return;await ok(SB.from('albums').insert({title:t,event_date:today}));C('ألبوم جديد',t)}
+function bk(){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(S)],{type:'application/json'}));a.download='elfanar-backup.json';a.click();logit('نسخة احتياطية','يدوي')}
+function rs(){alert('الاسترجاع يتم من لوحة Supabase')}
+async function doLogin(){const r=await SB.auth.signInWithPassword({email:$('#em').value.trim(),password:$('#pw').value});if(r.error){$('#lm').textContent='البريد أو كلمة المرور غير صحيحة';return}boot()}
+let SES=null;
+function lbc(){if(SES)SB.auth.signOut().then(()=>location.reload());else $('#login').style.display='grid'}
+async function boot(){const {data}=await SB.auth.getSession();SES=data.session;role='scout';
+if(SES){const p=await SB.from('profiles').select('role').eq('id',SES.user.id).single();role=(p.data&&p.data.role)||'scout'}
+$('#login').style.display='none';$('#who').textContent=SES?ROLE[role]:'';$('#lb').textContent=SES?'خروج':'دخول الإدارة';await reload();R()}
+addEventListener('hashchange',R);boot();
+</script>
+</body>
+</html>
