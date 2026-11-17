@@ -162,7 +162,7 @@ function bk(){const a=document.createElement('a');a.href=URL.createObjectURL(new
 function rs(){alert('الاسترجاع يتم من لوحة Supabase')}
 async function doLogin(){const r=await SB.auth.signInWithPassword({email:$('#em').value.trim(),password:$('#pw').value});if(r.error){$('#lm').textContent='البريد أو كلمة المرور غير صحيحة';return}boot()}
 let SES=null;
-function lbc(){if(SES)SB.auth.signOut().then(()=>location.reload());else $('#login').style.display='grid'}
+async function lbc(){if(!SES){$('#login').style.display='grid';return}try{await SB.auth.signOut({scope:'local'})}catch(e){}try{Object.keys(localStorage).filter(k=>k.indexOf('sb-')==0).forEach(k=>localStorage.removeItem(k))}catch(e){}location.href=location.pathname}
 async function boot(){const {data}=await SB.auth.getSession();SES=data.session;role='scout';
 if(SES){const p=await SB.from('profiles').select('role').eq('id',SES.user.id).single();role=(p.data&&p.data.role)||'scout'}
 $('#login').style.display='none';$('#who').textContent=SES?ROLE[role]:'';$('#lb').textContent=SES?'خروج':'دخول الإدارة';await reload();R()}
