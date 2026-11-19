@@ -52,7 +52,7 @@ a{color:inherit}
 <main id="app"><div class="card">جاري التحميل...</div></main>
 
 <svg width="0" height="0" style="position:absolute"><defs><g id="fn" fill="none" stroke="#c5ccd6" stroke-width="3" stroke-linejoin="round"><path d="M26 56 L30 20 H34 L38 56 Z" fill="#fff" fill-opacity=".15"/><path d="M28 20 H36 L32 10 Z"/><path d="M12 28 L28 24 M52 28 L36 24"/><path d="M20 56 H44"/></g></defs></svg>
-<div id="login" style="display:none;position:fixed;inset:0;z-index:20;background:#0b1f3a;place-items:center;padding:20px"><div class="card" style="width:min(340px,100%)"><div class="hero"><svg viewBox="0 0 64 64" style="background:#0b1f3a;border-radius:50%;padding:8px"><use href="#fn"/></svg><h2>الفنار سكاوت</h2></div><input id="em" type="text" dir="ltr" placeholder="البريد الإلكتروني"><input id="pw" type="password" dir="ltr" placeholder="كلمة المرور" style="width:100%;margin:8px 0"><button onclick="doLogin()" style="width:100%">دخول</button><button class="s" onclick="$('#login').style.display='none'" style="width:100%;margin-top:6px">رجوع للموقع</button><div id="lm" class="neg" style="margin-top:6px"></div></div></div>
+<div id="login" style="display:none;position:fixed;inset:0;z-index:20;background:#0b1f3a;place-items:center;padding:20px"><div class="card" style="width:min(340px,100%)"><div class="hero"><svg viewBox="0 0 64 64" style="background:#0b1f3a;border-radius:50%;padding:8px"><use href="#fn"/></svg><h2>الفنار سكاوت</h2></div><input id="em" type="text" dir="ltr" placeholder="البريد الإلكتروني"><input id="pw" type="password" dir="ltr" placeholder="كلمة المرور" style="width:100%;margin:8px 0"><input id="sc" type="text" dir="ltr" placeholder="كود الربط (للحساب الجديد فقط)" style="width:100%;margin-bottom:8px"><button onclick="doLogin()" style="width:100%">دخول</button><button class="s" onclick="doSignup()" style="width:100%;margin-top:6px">إنشاء حساب جديد</button><button class="s" onclick="$('#login').style.display='none'" style="width:100%;margin-top:6px">رجوع للموقع</button><div id="lm" class="neg" style="margin-top:6px"></div></div></div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
 <script>
 const showErr=m=>{const a=document.getElementById("app");if(a)a.innerHTML="<div class=card style=color:#b23a3a>حدث خطأ: "+String(m).replace(/</g,"")+"</div>"};
@@ -76,8 +76,8 @@ const bal=id=>S.bonus.filter(b=>b.s==id).reduce((a,b)=>a+b.v,0);
 const att=id=>{const m=S.meet.filter(x=>id in x.p);const p=m.filter(x=>x.p[id]).length;return{p,t:m.length,r:m.length?Math.round(p/m.length*100):0}};
 const ini=n=>n.trim()[0];
 const logo=(big)=>`<svg viewBox="0 0 64 64" style="background:#0b1f3a;border-radius:50%;padding:8px"><use href="#fn"/></svg>`;
-const pages=[["home","الرئيسية"],["scouts","الكشافين"],["patrols","الطلايع"],["attend","الحضور"],["bonus","البونص"],["badges","الشارات"],["lib","المكتبة"],["news","الأخبار"],["album","الذكريات"],["stats","الإحصائيات"],["log","السجل"],["admin","الإعدادات"]];
-const vis=k=>({log:adm(),admin:role==="admin1"})[k]!==false;
+const pages=[["home","الرئيسية"],["me","صفحتي"],["scouts","الكشافين"],["patrols","الطلايع"],["attend","الحضور"],["bonus","البونص"],["badges","الشارات"],["lib","المكتبة"],["news","الأخبار"],["album","الذكريات"],["stats","الإحصائيات"],["log","السجل"],["admin","الإعدادات"]];
+const vis=k=>({log:adm(),admin:role==="admin1",scouts:adm(),scout:adm(),attend:adm(),bonus:adm(),stats:adm(),me:!!SES&&!adm()})[k]!==false;
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 let libSec="الصيحات الكشفية",q="",ym=today.slice(0,7);
 function R(){
@@ -88,18 +88,19 @@ const f=V[pg]||V.home;$("#app").innerHTML=vis(pg)||!V[pg]?f(arg):'<div class="ca
 const V={
 home(){const imp=S.news.filter(n=>n.imp);return`<div class="hero">${logo()}<h2>أهلًا بك في الفنار سكاوت</h2><div class="mut">مجموعة الفنار الكشفية</div></div>
 ${imp.map(n=>`<div class="alert"><b>${esc(n.t)}</b><br>${esc(n.x)}<br><small>${n.date}</small></div>`).join("")}
-<div class="grid">${[["scouts","دليل الكشافين"],["lib","المكتبة الكشفية"],["album","ألبوم الذكريات"],["news","الأخبار"],["patrols","الطلايع"],["attend","الحضور"]].map(a=>`<a class="card" href="#${a[0]}" style="text-decoration:none;text-align:center;font-weight:600">${a[1]}</a>`).join("")}</div>`},
+<div class="grid">${[["scouts","دليل الكشافين"],["lib","المكتبة الكشفية"],["album","ألبوم الذكريات"],["news","الأخبار"],["patrols","الطلايع"],["attend","الحضور"]].filter(a=>vis(a[0])).map(a=>`<a class="card" href="#${a[0]}" style="text-decoration:none;text-align:center;font-weight:600">${a[1]}</a>`).join("")}</div>`},
+me(){if(!SES)return`<div class="card">سجّل دخولك لعرض صفحتك.<br><button onclick="$('#login').style.display='grid'" style="margin-top:6px">دخول / إنشاء حساب</button></div>`;if(adm())return'<div class="card">أنت مسجل كمسؤول، وصفحات الكشافين من قسم الكشافين.</div>';const s=S.scouts[0];if(!s)return`<div class="card"><b>اربط حسابك بملفك</b><div class="mut">اكتب الكود اللي أخدته من الإدارة</div><input id="cc" type="text" dir="ltr" placeholder="مثال: K7M2QX" style="margin:6px 0"><button onclick="linkCode()">ربط</button></div>`;return V.scout(s.id,1)},
 scouts(){return`<h2>دليل الكشافين</h2>${adm()?`<div class="card row"><input id="nn" type="text" placeholder="اسم كشاف جديد" style="flex:1"><button onclick="addScout()">إضافة</button><label class="btn s" style="background:var(--line);color:var(--ink)">استيراد Excel/CSV<input type="file" accept=".csv" hidden onchange="imp(this)"></label></div>`:""}
 ${act().map(s=>`<a class="card row" href="#scout-${s.id}" style="text-decoration:none"><div class="av">${ini(s.name)}</div><div style="flex:1"><b>${esc(s.name)}</b><div class="mut">${s.stage} · ${pt(s.patrol)?.name||"—"}</div></div><span class="mut">${bal(s.id)} نقطة</span></a>`).join("")}
 ${S.scouts.some(s=>s.arch)?`<h2>الأرشيف</h2>`+S.scouts.filter(s=>s.arch).map(s=>`<a class="card" href="#scout-${s.id}" style="display:block;text-decoration:none">${esc(s.name)} <span class="mut">(مؤرشف)</span></a>`).join(""):""}`},
-scout(id){const s=sc(id);if(!s)return"";const a=att(s.id);
+scout(id,own){const s=sc(id);if(!s)return"";const a=att(s.id);
 return`<div class="card row"><div class="av" style="width:64px;height:64px;font-size:26px">${ini(s.name)}</div><div><h2 style="margin:0">${esc(s.name)}</h2><span class="mut">${age(s.birth)} سنة · ${s.stage}</span></div></div>
 <div class="card"><b>بيانات شخصية</b><br>تاريخ الميلاد: ${s.birth}<br>أب الاعتراف: ${esc(s.father)}
-${adm()?`<br>التليفون: ${s.phone}<br>ولي الأمر: ${s.parent}<br>العنوان: ${esc(s.addr)}`:`<br><span class="mut">الأرقام والعنوان للإدارة فقط</span>`}</div>
+${adm()||own?`<br>التليفون: ${s.phone}<br>ولي الأمر: ${s.parent}<br>العنوان: ${esc(s.addr)}`:`<br><span class="mut">الأرقام والعنوان للإدارة فقط</span>`}</div>
 <div class="card"><b>بيانات كشفية</b><br>الانضمام: ${s.join}<br>الطليعة: ${pt(s.patrol)?.name||"—"}<br>الكوفية: ${esc(s.scarf)}<br>الحضور: ${a.p} من ${a.t} (${a.r}%)</div>
 <div class="card"><b>الشارات</b><div class="row">${S.awards.filter(w=>w.s==s.id).map(w=>{const b=S.badges.find(x=>x.id==w.b);return`<div style="text-align:center"><div style="font-size:30px">${b.img}</div><div style="font-size:13px">${esc(b.name)}</div><div class="mut">${w.date}</div></div>`}).join("")||"<span class='mut'>لا شارات بعد</span>"}</div></div>
 <div class="card"><b>رصيد البونص: ${bal(s.id)}</b><div class="tbl"><table>${S.bonus.filter(b=>b.s==s.id).map(b=>`<tr><td class="${b.v>0?"pos":"neg"}">${b.v>0?"+":""}${b.v}</td><td>${esc(b.why)}</td><td>${b.date}</td></tr>`).join("")}</table></div></div>
-${adm()?`<div class="card"><b>تعديل البيانات</b><div class="grid" style="margin-top:6px">${[["name","الاسم",s.name,"text"],["birth","تاريخ الميلاد",s.birth,"date"],["stage","المرحلة الدراسية",s.stage,"text"],["father","أب الاعتراف",s.father,"text"],["join","تاريخ الانضمام",s.join,"date"],["scarf","الكوفية",s.scarf,"text"],["phone","التليفون",s.phone,"text"],["parent","تليفون ولي الأمر",s.parent,"text"],["addr","العنوان",s.addr,"text"]].map(f=>`<label class="mut">${f[1]}<input id="e_${f[0]}" type="${f[3]}" value="${esc(f[3]=="date"&&!/^\d/.test(f[2])?"":f[2])}" style="width:100%"></label>`).join("")}</div><button style="margin-top:8px" onclick="saveScout(${s.id})">حفظ</button></div>`:""}
+${adm()?`<div class="card"><b>تعديل البيانات</b> <span class="mut">— كود الربط: <b dir="ltr">${s.claim_code||"—"}</b></span><div class="grid" style="margin-top:6px">${[["name","الاسم",s.name,"text"],["birth","تاريخ الميلاد",s.birth,"date"],["stage","المرحلة الدراسية",s.stage,"text"],["father","أب الاعتراف",s.father,"text"],["join","تاريخ الانضمام",s.join,"date"],["scarf","الكوفية",s.scarf,"text"],["phone","التليفون",s.phone,"text"],["parent","تليفون ولي الأمر",s.parent,"text"],["addr","العنوان",s.addr,"text"]].map(f=>`<label class="mut">${f[1]}<input id="e_${f[0]}" type="${f[3]}" value="${esc(f[3]=="date"&&!/^\d/.test(f[2])?"":f[2])}" style="width:100%"></label>`).join("")}</div><button style="margin-top:8px" onclick="saveScout(${s.id})">حفظ</button></div>`:""}
 ${adm()?`<div class="card row"><select onchange="mv(${s.id},this.value)">${S.patrols.map(p=>`<option value="${p.id}" ${p.id==s.patrol?"selected":""}>${p.name}</option>`).join("")}</select><button class="s" onclick="arch(${s.id})">${s.arch?"استرجاع":"أرشفة"}</button></div>`:""}`},
 patrols(){return`<h2>الطلايع</h2>${S.patrols.map(p=>`<div class="card"><div class="row"><span style="font-size:30px">${p.logo}</span><b style="flex:1">${esc(p.name)}</b><span class="tag" style="background:${p.color}">${p.flag}</span></div><div class="mut">الصيحة: ${esc(p.cry)}</div><div>${act().filter(s=>s.patrol==p.id).map(s=>esc(s.name)).join("، ")||"—"}</div>${adm()?`<button class="s" style="margin-top:6px" onclick="editP(${p.id})">تعديل الصيحة</button>`:""}</div>`).join("")}`},
 attend(){const ms=S.meet.filter(m=>m.date.slice(0,7)==ym);return`<h2>الحضور والغياب</h2>
@@ -131,7 +132,7 @@ const g=n=>SB.from(n).select('*');
 const r=await Promise.all([g('patrols'),g('scouts'),g('scout_private'),g('badges'),g('awards'),g('meetings'),g('attendance'),g('bonus'),g('library'),g('news'),g('albums'),adm()?g('audit_log'):Promise.resolve({data:[]})]);
 const [pa,sc2,pv,ba,aw,me,at,bo,lb,ne,al,lg]=r.map(x=>x.data||[]);
 S.patrols=pa;
-S.scouts=sc2.map(x=>{const v=pv.find(y=>y.scout_id==x.id)||{};return{id:x.id,name:x.name,birth:x.birth||'2012-01-01',stage:x.stage||'—',father:x.father||'—',join:x.join_date||'—',patrol:x.patrol_id,scarf:x.scarf||'—',arch:x.archived?1:0,phone:v.phone||'',parent:v.parent_phone||'',addr:v.address||''}});
+S.scouts=sc2.map(x=>{const v=pv.find(y=>y.scout_id==x.id)||{};return{id:x.id,claim_code:x.claim_code,name:x.name,birth:x.birth||'2012-01-01',stage:x.stage||'—',father:x.father||'—',join:x.join_date||'—',patrol:x.patrol_id,scarf:x.scarf||'—',arch:x.archived?1:0,phone:v.phone||'',parent:v.parent_phone||'',addr:v.address||''}});
 S.badges=ba.map(b=>({id:b.id,name:b.name,desc:b.description||'',img:b.image||'🎖️'}));
 S.awards=aw.map(w=>({b:w.badge_id,s:w.scout_id,date:w.date}));
 S.meet=me.map(m=>{const p={};at.filter(a=>a.meeting_id==m.id).forEach(a=>p[a.scout_id]=a.present?1:0);return{id:m.id,date:m.date,p}});
@@ -160,12 +161,17 @@ async function addN(){const t=$('#nt').value.trim();if(!t)return;await ok(SB.fro
 async function addA(){const t=$('#at').value.trim();if(!t)return;await ok(SB.from('albums').insert({title:t,event_date:today}));C('ألبوم جديد',t)}
 function bk(){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(S)],{type:'application/json'}));a.download='elfanar-backup.json';a.click();logit('نسخة احتياطية','يدوي')}
 function rs(){alert('الاسترجاع يتم من لوحة Supabase')}
+async function linkCode(){const r=await SB.rpc('claim_scout',{c:$('#cc').value});if(r.error||!r.data){alert('الكود غير صحيح أو مستخدم من قبل');return}boot()}
+async function doSignup(){const m=$('#lm'),c=$('#sc').value.trim();if(!c){m.textContent='اكتب كود الربط';return}
+const r=await SB.auth.signUp({email:$('#em').value.trim(),password:$('#pw').value});if(r.error){m.textContent=r.error.message;return}
+if(!r.data.session){m.textContent='تحقق من بريدك لتفعيل الحساب ثم ادخل';return}
+const k=await SB.rpc('claim_scout',{c});if(k.error||!k.data)alert('تم إنشاء الحساب، لكن الكود غير صحيح. اربطه من صفحتك.');boot()}
 async function doLogin(){const r=await SB.auth.signInWithPassword({email:$('#em').value.trim(),password:$('#pw').value});if(r.error){$('#lm').textContent='البريد أو كلمة المرور غير صحيحة';return}boot()}
 let SES=null;
 async function lbc(){if(!SES){$('#login').style.display='grid';return}try{await SB.auth.signOut({scope:'local'})}catch(e){}try{Object.keys(localStorage).filter(k=>k.indexOf('sb-')==0).forEach(k=>localStorage.removeItem(k))}catch(e){}location.href=location.pathname}
 async function boot(){const {data}=await SB.auth.getSession();SES=data.session;role='scout';
 if(SES){const p=await SB.from('profiles').select('role').eq('id',SES.user.id).single();role=(p.data&&p.data.role)||'scout'}
-$('#login').style.display='none';$('#who').textContent=SES?ROLE[role]:'';$('#lb').textContent=SES?'خروج':'دخول الإدارة';await reload();R()}
+if(SES&&role=='scout'&&!location.hash)location.hash='me';$('#login').style.display='none';$('#who').textContent=SES?ROLE[role]:'';$('#lb').textContent=SES?'خروج':'دخول الإدارة';await reload();R()}
 addEventListener('hashchange',R);boot();
 </script>
 </body>
