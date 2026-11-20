@@ -1,0 +1,23 @@
+name: Backup
+on:
+  schedule:
+    - cron: '0 2 * * 0'
+  workflow_dispatch:
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Export tables
+        env:
+          URL: https://gythhoywshbygqmdnyod.supabase.co
+          KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+        run: |
+          mkdir backup
+          for t in profiles patrols scouts scout_private meetings attendance bonus badges awards library news albums audit_log; do
+            curl -s "$URL/rest/v1/$t?select=*" -H "apikey: $KEY" -o backup/$t.json
+          done
+      - uses: actions/upload-artifact@v4
+        with:
+          name: elfanar-backup
+          path: backup
+          retention-days: 90
