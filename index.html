@@ -44,7 +44,7 @@ a{color:inherit}
 </head>
 <body>
 <header>
-<svg width="26" height="26" viewBox="0 0 64 64"><use href="#fn"/></svg>
+<img src="icon.png" width="30" height="30" alt="" onerror="this.style.display='none';this.nextElementSibling.style.display=''"><svg width="26" height="26" viewBox="0 0 64 64" style="display:none"><use href="#fn"/></svg>
 <b>الفنار سكاوت</b>
 <span id="who" class="mut" style="color:#c5ccd6"></span><button class="s" id="lb" onclick="lbc()">دخول الإدارة</button>
 </header>
@@ -67,7 +67,7 @@ const ok=async p=>{const r=await p;if(r.error){alert('حدث خطأ: '+r.error.m
 let role="admin1";
 const ROLE={admin1:"المسؤول الأساسي",admin2:"المسؤول الثاني",scout:"كشاف"};
 const adm=()=>role!=="scout";
-const logit=(op,det)=>SB.from('audit_log').insert({who:ROLE[role],op,details:det});
+const logit=(op,det)=>SB.from('audit_log').insert({who:(SES&&SES.user?SES.user.email:'')+' — '+ROLE[role],op,details:det});
 const age=b=>Math.floor((Date.now()-new Date(b))/31557600000);
 const act=()=>S.scouts.filter(s=>!s.arch);
 const sc=id=>S.scouts.find(s=>s.id==id);
@@ -75,11 +75,11 @@ const pt=id=>S.patrols.find(p=>p.id==id);
 const bal=id=>S.bonus.filter(b=>b.s==id).reduce((a,b)=>a+b.v,0);
 const att=id=>{const m=S.meet.filter(x=>id in x.p);const p=m.filter(x=>x.p[id]).length;return{p,t:m.length,r:m.length?Math.round(p/m.length*100):0}};
 const ini=n=>n.trim()[0];
-const logo=(big)=>`<svg viewBox="0 0 64 64" style="background:#0b1f3a;border-radius:50%;padding:8px"><use href="#fn"/></svg>`;
+const logo=()=>`<img src="logo.png" alt="الفنار سكاوت" style="width:150px;max-width:60%" onerror="this.style.display='none';this.nextElementSibling.style.display=''"><svg viewBox="0 0 64 64" style="display:none;background:#0b1f3a;border-radius:50%;padding:8px"><use href="#fn"/></svg>`;
 const pages=[["home","الرئيسية"],["me","صفحتي"],["scouts","الكشافين"],["patrols","الطلايع"],["attend","الحضور"],["bonus","البونص"],["badges","الشارات"],["lib","المكتبة"],["news","الأخبار"],["album","الذكريات"],["stats","الإحصائيات"],["log","السجل"],["admin","الإعدادات"]];
 const vis=k=>({log:adm(),admin:role==="admin1",scouts:adm(),scout:adm(),attend:adm(),bonus:adm(),stats:adm(),me:!!SES&&!adm()})[k]!==false;
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
-let libSec="الصيحات الكشفية",q="",ym=today.slice(0,7),selM=null;
+let libSec="الصيحات الكشفية",q="",ym=today.slice(0,7),selM=null,per=30;
 function R(){
 const h=(location.hash||"#home").slice(1);const [pg,arg]=h.split("-");
 $("#nav").innerHTML=pages.filter(p=>vis(p[0])).map(p=>`<a href="#${p[0]}" class="${p[0]==pg||(pg=="scout"&&p[0]=="scouts")?"on":""}">${p[1]}</a>`).join("");
@@ -128,12 +128,16 @@ ${adm()?`<div class="card" style="margin-top:8px"><b>إضافة في قسم ${li
 news(){return`<h2>الأخبار والإعلانات</h2>${adm()?`<div class="card"><input id="nt" type="text" placeholder="العنوان"><input id="nx" type="text" placeholder="النص" style="margin-top:6px"><div class="row" style="margin-top:6px"><label><input type="checkbox" id="ni"> مهم (يظهر في الرئيسية)</label><button onclick="addN()">نشر</button></div></div>`:""}
 ${S.news.map(n=>`<div class="card" ${n.imp?'style="border-inline-start:5px solid #0b1f3a"':""}><b>${esc(n.t)}</b> ${n.imp?'<span class="tag" style="background:#0b1f3a">مهم</span>':""}<div>${esc(n.x)}</div><div class="mut">${n.date}</div></div>`).join("")}`},
 album(){return`<h2>ألبوم الذكريات</h2>${adm()?`<div class="card row"><input id="at" type="text" placeholder="اسم المناسبة" style="flex:1"><button onclick="addA()">ألبوم جديد</button></div>`:""}<div class="grid">${S.albums.map(a=>`<div class="card"><b>${esc(a.t)}</b><div class="mut">${a.date}</div><div style="font-size:13px">${esc(a.x||"")}</div>${a.photos.map(u=>`<img src="${esc(u)}" loading="lazy" style="width:100%;border-radius:8px;margin-top:6px">`).join("")}${adm()?`<label class="mut" style="display:block;margin-top:6px">إضافة صور <input type="file" accept="image/*" multiple onchange="addPhotos(${a.id},this)"></label>`:""}</div>`).join("")}</div>`},
-stats(){const A=act(),tot=S.bonus.reduce((a,b)=>a+(b.v>0?b.v:0),0),neg=S.bonus.reduce((a,b)=>a+(b.v<0?-b.v:0),0);return`<h2>الإحصائيات والتقارير</h2>
-<div class="grid"><div class="card"><b>${A.length}</b><div class="mut">كشاف نشط</div></div><div class="card"><b>${S.meet.length}</b><div class="mut">اجتماع</div></div><div class="card"><b>${S.awards.length}</b><div class="mut">شارة ممنوحة</div></div><div class="card"><b class="pos">+${tot}</b> / <b class="neg">-${neg}</b><div class="mut">بونص</div></div></div>
-<div class="card"><b>الطلايع</b>${S.patrols.map(p=>`<div>${p.name}: ${A.filter(s=>s.patrol==p.id).length}</div>`).join("")}</div>
-<div class="card"><b>نسب الالتزام</b>${A.map(s=>{const a=att(s.id);return`<div class="mut">${esc(s.name)} — ${a.r}%</div><div class="bar"><i style="width:${a.r}%"></i></div>`}).join("")}</div>`},
+stats(){const A=act(),c=per?new Date(Date.now()-per*864e5).toISOString().slice(0,10):'',ms=S.meet.filter(m=>m.date>=c),bo=S.bonus.filter(b=>b.date>=c),aw=S.awards.filter(w=>w.date>=c),add=bo.reduce((a,b)=>a+(b.v>0?b.v:0),0),ded=bo.reduce((a,b)=>a+(b.v<0?-b.v:0),0);
+const rt=s=>{const p=ms.filter(m=>m.p[s.id]).length;return{p,r:ms.length?Math.round(p/ms.length*100):0}};
+const avg=A.length&&ms.length?Math.round(A.reduce((a,s)=>a+rt(s).r,0)/A.length):0;
+return`<h2>الإحصائيات والتقارير</h2><div class="card row"><span>الفترة:</span><select onchange="per=+this.value;R()">${[[7,'آخر أسبوع'],[30,'آخر شهر'],[90,'آخر 3 شهور'],[365,'آخر سنة'],[0,'كل الفترات']].map(o=>`<option value="${o[0]}" ${o[0]==per?'selected':''}>${o[1]}</option>`).join('')}</select></div>
+<div class="grid"><div class="card"><b>${A.length}</b><div class="mut">إجمالي الكشافين</div></div><div class="card"><b>${ms.length}</b><div class="mut">اجتماع</div></div><div class="card"><b>${avg}%</b><div class="mut">متوسط الالتزام</div></div><div class="card"><b>${aw.length}</b><div class="mut">شارة مكتسبة</div></div><div class="card"><b class="pos">+${add}</b> / <b class="neg">-${ded}</b><div class="mut">بونص مضاف / مخصوم</div></div></div>
+<div class="card"><b>أعداد الكشافين بكل طليعة</b>${S.patrols.map(p=>`<div>${esc(p.name)}: ${A.filter(s=>s.patrol==p.id).length}</div>`).join('')}<div>بدون طليعة: ${A.filter(s=>!pt(s.patrol)).length}</div></div>
+<div class="card"><b>الحضور والغياب لكل كشاف</b>${A.map(s=>{const t=rt(s);return`<div class="mut">${esc(s.name)} — حضر ${t.p} من ${ms.length} (${t.r}%)</div><div class="bar"><i style="width:${t.r}%"></i></div>`}).join('')}</div>
+<div class="card"><b>الشارات المكتسبة</b>${S.badges.map(b=>`<div>${esc(b.name)}: ${aw.filter(w=>w.b==b.id).length}</div>`).join('')||'—'}</div>`},
 log(){return`<h2>سجل النشاط الإداري</h2><div class="card tbl"><table>${S.log.map(l=>`<tr><td>${l.at}</td><td>${l.who}</td><td>${esc(l.op)}</td><td>${esc(l.det)}</td></tr>`).join("")||"<tr><td>لا عمليات بعد</td></tr>"}</table></div>`},
-admin(){return`<h2>الإعدادات والنسخ الاحتياطي</h2><div class="card"><div class="row"><button onclick="bk()">تنزيل نسخة احتياطية</button><label class="btn s" style="background:var(--line);color:var(--ink)">استرجاع<input type="file" accept=".json" hidden onchange="rs(this)"></label></div><p class="mut">في النسخة الحقيقية: نسخ تلقائي منتظم، وإدارة حسابات المسؤولين وصلاحياتهم.</p></div>`}
+admin(){return`<h2>الإعدادات والحسابات</h2><div class="card"><b>النسخ الاحتياطي</b><div class="row" style="margin-top:6px"><button onclick="bk()">تنزيل نسخة احتياطية كاملة</button></div><p class="mut">يوجد أيضًا نسخ تلقائي أسبوعي عبر GitHub (أعدّه مرة واحدة).</p></div><div class="card"><b>الحسابات والصلاحيات</b><div class="tbl"><table>${(S.profiles||[]).map(p=>`<tr><td dir="ltr">${esc(p.name||p.id.slice(0,8))}</td><td>${p.scout_id?esc((sc(p.scout_id)||{}).name||'كشاف'):'—'}</td><td><select onchange="setRole('${p.id}',this.value)" ${SES&&p.id==SES.user.id?'disabled':''}><option value="scout" ${p.role=='scout'?'selected':''}>كشاف</option><option value="admin2" ${p.role=='admin2'?'selected':''}>المسؤول الثاني</option><option value="admin1" ${p.role=='admin1'?'selected':''}>المسؤول الأساسي</option></select></td></tr>`).join('')}</table></div></div>`}
 };
 const yid=u=>{const m=u.match(/(?:youtu\.be\/|v=|embed\/|shorts\/)([\w-]{11})/);return m?m[1]:null};
 const media=u=>yid(u)?`<iframe src="https://www.youtube-nocookie.com/embed/${yid(u)}" allowfullscreen style="width:100%;aspect-ratio:16/9;border:0;border-radius:8px;margin-top:8px"></iframe>`:`<img src="${esc(u)}" loading="lazy" style="width:100%;border-radius:8px;margin-top:8px">`;
@@ -143,7 +147,7 @@ async function reload(){
 const g=n=>SB.from(n).select('*');
 const r=await Promise.all([g('patrols'),g('scouts'),g('scout_private'),g('badges'),g('awards'),g('meetings'),g('attendance'),g('bonus'),g('library'),g('news'),g('albums'),adm()?g('audit_log'):Promise.resolve({data:[]})]);
 const [pa,sc2,pv,ba,aw,me,at,bo,lb,ne,al,lg]=r.map(x=>x.data||[]);
-S.patrols=pa;
+S.patrols=pa;if(role=='admin1')S.profiles=(await SB.from('profiles').select('*')).data||[];
 S.scouts=sc2.map(x=>{const v=pv.find(y=>y.scout_id==x.id)||{};return{id:x.id,photo:x.photo,claim_code:x.claim_code,name:x.name,birth:x.birth||'2012-01-01',stage:x.stage||'—',father:x.father||'—',join:x.join_date||'—',patrol:x.patrol_id,scarf:x.scarf||'—',arch:x.archived?1:0,phone:v.phone||'',parent:v.parent_phone||'',addr:v.address||''}});
 S.badges=ba.map(b=>({id:b.id,name:b.name,desc:b.description||'',img:b.image||'🎖️'}));
 S.awards=aw.map(w=>({b:w.badge_id,s:w.scout_id,date:w.date}));
@@ -183,7 +187,8 @@ async function addL(){const t=$('#lt').value.trim();if(!t)return;const m=[];for(
 async function delL(id){if(!confirm('حذف هذا المحتوى؟'))return;await ok(SB.from('library').delete().eq('id',id));C('حذف محتوى',String(id))}
 async function addN(){const t=$('#nt').value.trim();if(!t)return;await ok(SB.from('news').insert({title:t,body:$('#nx').value,important:$('#ni').checked}));C('نشر خبر',t)}
 async function addA(){const t=$('#at').value.trim();if(!t)return;await ok(SB.from('albums').insert({title:t,event_date:today}));C('ألبوم جديد',t)}
-function bk(){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(S)],{type:'application/json'}));a.download='elfanar-backup.json';a.click();logit('نسخة احتياطية','يدوي')}
+async function bk(){const out={};for(const t of ['patrols','scouts','scout_private','meetings','attendance','bonus','badges','awards','library','news','albums','audit_log'])out[t]=(await SB.from(t).select('*')).data;const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(out)],{type:'application/json'}));a.download='elfanar-backup-'+today+'.json';a.click();logit('نسخة احتياطية','يدوي')}
+async function setRole(id,r){await ok(SB.from('profiles').update({role:r}).eq('id',id));C('تغيير صلاحية','→ '+r)}
 function rs(){alert('الاسترجاع يتم من لوحة Supabase')}
 async function linkCode(){const r=await SB.rpc('claim_scout',{c:$('#cc').value});if(r.error||!r.data){alert('الكود غير صحيح أو مستخدم من قبل');return}boot()}
 async function doSignup(){const m=$('#lm'),c=$('#sc').value.trim();if(!c){m.textContent='اكتب كود الربط';return}
